@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	tk, err := gap.Scanln("Token: ", "-")
+	tk, err := gap.ScanSecret("Token: ", "-")
 	if err != nil {
 		log.Fatal(err)
 	}
