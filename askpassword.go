@@ -76,6 +76,7 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer tty.Close()
 
 	// handle interrupts (i.e. ctrl-c)
 	sigchan := make(chan os.Signal, 1)
