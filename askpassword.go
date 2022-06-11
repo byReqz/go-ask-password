@@ -3,7 +3,9 @@ package AskPassword
 import (
 	"fmt"
 	"github.com/mattn/go-tty"
+	"strings"
 	"unicode"
+	"unicode/utf8"
 )
 
 // Scan takes (printable) input till a newline is entered.
@@ -58,16 +60,16 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 	}
 	defer tty.Close()
 
-	var buf string
+	var buf []string
 	var toggled bool
 	fmt.Print(prefix, "(press TAB for no echo)")
 	for {
 		if len(buf) == 0 && toggled {
-			fmt.Print("\r", Fillerstring(len(prefix), 24, " "), "\r", prefix)
+			fmt.Print("\r", Fillerstring(utf8.RuneCountInString(prefix), 24, " "), "\r", prefix)
 		}
 		r, err := tty.ReadRune()
 		if err != nil {
-			return buf, err
+			return "", err
 		}
 		if r == 13 { // rune 13 == return carriage
 			fmt.Print("\n")
@@ -76,13 +78,13 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 			if !toggled && len(buf) == 0 {
 				toggled = !toggled
 			} else if toggled {
-				space := Fillerstring(len(prefix), len(buf), " ")
+				space := Fillerstring(utf8.RuneCountInString(prefix), len(buf), " ")
 				mask := Fillerstring(0, len(buf), "*")
 				fmt.Print("\r", space, "\r", prefix, mask)
 				toggled = !toggled
 			} else {
-				space := Fillerstring(len(prefix), len(buf), " ")
-				fmt.Print("\r", space, "\r", prefix, buf)
+				space := Fillerstring(utf8.RuneCountInString(prefix), len(buf), " ")
+				fmt.Print("\r", space, "\r", prefix, strings.Join(buf, ""))
 				toggled = !toggled
 			}
 		} else if r == 127 || r == 8 { // rune 127 == backspace
@@ -93,21 +95,21 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 		} else {
 			if unicode.IsPrint(r) {
 				if len(buf) == 0 {
-					space := Fillerstring(len(prefix), 24, " ")
+					space := Fillerstring(utf8.RuneCountInString(prefix), 24, " ")
 					fmt.Print("\r", space, "\r", prefix)
 				}
-				buf = buf + string(r)
+				buf = append(buf, string(r))
 				if toggled {
 					fmt.Print(string(r))
 				} else {
 					fmt.Print(substitute)
 				}
 			} else {
-				return buf, fmt.Errorf("unprintable character entered")
+				return strings.Join(buf, ""), fmt.Errorf("unprintable character entered")
 			}
 		}
 	}
-	return buf, nil
+	return strings.Join(buf, ""), nil
 }
 
 func AskPassword(prefix string) (string, error) {
