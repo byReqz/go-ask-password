@@ -28,29 +28,34 @@ func Scan(prefix string) (string, error) {
 		os.Exit(1)
 		return
 	}()
-	defer func() { sigchan <- os.Interrupt }() //kill goroutine after function has ended
+	defer func() { sigchan <- os.Interrupt }() // kill goroutine after function has ended
 
 	fmt.Print(prefix)
-	var buf string
+	var buf []string
 	for {
 		r, err := tty.ReadRune()
 		if err != nil {
-			return buf, err
+			return "", err
 		}
 		if r == 13 { // rune 13 == return carriage
 			fmt.Print("\n")
 			break
+		} else if r == 127 || r == 8 { // rune 127 == backspace
+			if len(buf) > 0 {
+				buf = buf[:len(buf)-1]
+				fmt.Print("\b \b")
+			}
 		} else {
 			if unicode.IsPrint(r) {
 				s := string(r)
-				buf = buf + s
+				buf = append(buf, s)
 				fmt.Print(s)
 			} else {
-				return buf, fmt.Errorf("unprintable character entered")
+				return strings.Join(buf, ""), fmt.Errorf("unprintable character entered")
 			}
 		}
 	}
-	return buf, nil
+	return strings.Join(buf, ""), nil
 }
 
 func Fillerstring(prelen int, buflen int, filler string) string {
@@ -81,7 +86,7 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 		os.Exit(1)
 		return
 	}()
-	defer func() { sigchan <- os.Interrupt }() //kill goroutine after function has ended
+	defer func() { sigchan <- os.Interrupt }() // kill goroutine after function has ended
 
 	var buf []string
 	var toggled bool
