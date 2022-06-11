@@ -3,6 +3,8 @@ package AskPassword
 import (
 	"fmt"
 	"github.com/mattn/go-tty"
+	"os"
+	"os/signal"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -16,6 +18,17 @@ func Scan(prefix string) (string, error) {
 		return "", err
 	}
 	defer tty.Close()
+
+	// handle interrupts (i.e. ctrl-c)
+	sigchan := make(chan os.Signal, 1)
+	signal.Notify(sigchan, os.Interrupt)
+	go func() {
+		<-sigchan
+		tty.Close()
+		os.Exit(1)
+		return
+	}()
+	defer func() { sigchan <- os.Interrupt }() //kill goroutine after function has ended
 
 	fmt.Print(prefix)
 	var buf string
@@ -58,7 +71,17 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer tty.Close()
+
+	// handle interrupts (i.e. ctrl-c)
+	sigchan := make(chan os.Signal, 1)
+	signal.Notify(sigchan, os.Interrupt)
+	go func() {
+		<-sigchan
+		tty.Close()
+		os.Exit(1)
+		return
+	}()
+	defer func() { sigchan <- os.Interrupt }() //kill goroutine after function has ended
 
 	var buf []string
 	var toggled bool
