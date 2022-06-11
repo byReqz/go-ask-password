@@ -84,6 +84,11 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 				fmt.Print("\r", space, "\r", prefix, buf)
 				toggled = !toggled
 			}
+		} else if r == 127 { // rune 127 == backspace
+			if len(buf) > 0 {
+				buf = buf[:len(buf)-1]
+				fmt.Print("\b \b")
+			}
 		} else {
 			if unicode.IsPrint(r) {
 				if len(buf) == 0 {
