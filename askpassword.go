@@ -60,9 +60,10 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 
 	var buf string
 	var toggled bool
+	fmt.Print(prefix, "(press TAB for no echo)")
 	for {
-		if len(buf) == 0 && !toggled {
-			fmt.Print(prefix, "(press TAB for no echo)")
+		if len(buf) == 0 && toggled {
+			fmt.Print("\r", Fillerstring(len(prefix), 24, " "), "\r", prefix)
 		}
 		r, err := tty.ReadRune()
 		if err != nil {
@@ -84,7 +85,7 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 				fmt.Print("\r", space, "\r", prefix, buf)
 				toggled = !toggled
 			}
-		} else if r == 127 { // rune 127 == backspace
+		} else if r == 127 || r == 8 { // rune 127 == backspace
 			if len(buf) > 0 {
 				buf = buf[:len(buf)-1]
 				fmt.Print("\b \b")
