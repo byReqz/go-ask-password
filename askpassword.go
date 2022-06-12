@@ -2,6 +2,7 @@ package AskPassword
 
 import (
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/mattn/go-tty"
 	"os"
 	"os/signal"
@@ -33,6 +34,8 @@ func Scan(prefix string) (string, error) {
 	}()
 	defer func() { sigchan <- os.Kill }() // kill goroutine after function has ended
 
+	prefixcolor := color.New(color.Bold, color.FgHiWhite)
+	prefix = prefixcolor.Sprint(prefix)
 	fmt.Print(prefix)
 	var buf []string
 	for {
@@ -97,7 +100,9 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 
 	var buf []string
 	var toggled bool
-	fmt.Print(prefix, "(press TAB for no echo)")
+	prefixcolor := color.New(color.Bold, color.FgHiWhite)
+	prefix = prefixcolor.Sprint(prefix)
+	fmt.Print(prefix, color.HiBlackString("(press TAB for no echo)"))
 	for {
 		if len(buf) == 0 && toggled {
 			fmt.Print("\r", Fillerstring(utf8.RuneCountInString(prefix), 24, " "), "\r", prefix)
@@ -147,6 +152,7 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 	return strings.Join(buf, ""), nil
 }
 
-func AskPassword(prefix string) (string, error) {
-	return ScanSecret(prefix, "*")
+// AskPassword is an opinionated default Password prompt like systemd-ask-password
+func AskPassword() (string, error) {
+	return ScanSecret("🔐 Password: ", "*")
 }
