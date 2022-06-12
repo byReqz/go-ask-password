@@ -23,12 +23,15 @@ func Scan(prefix string) (string, error) {
 	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, os.Interrupt)
 	go func() {
-		<-sigchan
-		tty.Close()
-		os.Exit(1)
+		sn := <-sigchan
+		if sn == os.Interrupt {
+			tty.Close()
+			os.Exit(1)
+		}
+		signal.Stop(sigchan)
 		return
 	}()
-	defer func() { sigchan <- os.Interrupt }() // kill goroutine after function has ended
+	defer func() { sigchan <- os.Kill }() // kill goroutine after function has ended
 
 	fmt.Print(prefix)
 	var buf []string
@@ -82,12 +85,15 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 	sigchan := make(chan os.Signal, 1)
 	signal.Notify(sigchan, os.Interrupt)
 	go func() {
-		<-sigchan
-		tty.Close()
-		os.Exit(1)
+		sn := <-sigchan
+		if sn == os.Interrupt {
+			tty.Close()
+			os.Exit(1)
+		}
+		signal.Stop(sigchan)
 		return
 	}()
-	defer func() { sigchan <- os.Interrupt }() // kill goroutine after function has ended
+	defer func() { sigchan <- os.Kill }() // kill goroutine after function has ended
 
 	var buf []string
 	var toggled bool
