@@ -34,8 +34,6 @@ func Scan(prefix string) (string, error) {
 	}()
 	defer func() { sigchan <- os.Kill }() // kill goroutine after function has ended
 
-	prefixcolor := color.New(color.Bold, color.FgHiWhite)
-	prefix = prefixcolor.Sprint(prefix)
 	fmt.Print(prefix)
 	var buf []string
 	for {
@@ -100,8 +98,6 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 
 	var buf []string
 	var toggled bool
-	prefixcolor := color.New(color.Bold, color.FgHiWhite)
-	prefix = prefixcolor.Sprint(prefix)
 	fmt.Print(prefix, color.HiBlackString("(press TAB for no echo)"))
 	for {
 		if len(buf) == 0 && toggled {
@@ -154,7 +150,7 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 
 // AskPassword is an opinionated default Password prompt like systemd-ask-password
 func AskPassword() (string, error) {
-	return ScanSecret("🔐 Password: ", "*")
+	return ScanSecret(color.New(color.Bold, color.FgHiWhite).Sprint("🔐 Password: "), "*")
 }
 
 // AskUser is an opinionated default Username prompt
