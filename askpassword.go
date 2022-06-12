@@ -24,17 +24,17 @@ func Scan(prefix string) (string, error) {
 
 	// handle interrupts (i.e. ctrl-c)
 	sigchan := make(chan os.Signal, 1)
-	signal.Notify(sigchan, os.Interrupt)
+	signal.Notify(sigchan, os.Interrupt, os.Kill)
 	go func() {
 		sn := <-sigchan
-		if sn == os.Interrupt {
+		if sn == os.Interrupt || sn == os.Kill {
 			_ = t.Close()
 			os.Exit(1)
 		}
 		signal.Stop(sigchan)
 		return
 	}()
-	defer func() { sigchan <- os.Kill }() // kill goroutine after function has ended
+	defer func() { var s os.Signal; sigchan <- s }() // kill goroutine after function has ended
 
 	fmt.Print(prefix)
 	var buf []string
@@ -88,17 +88,17 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 
 	// handle interrupts (i.e. ctrl-c)
 	sigchan := make(chan os.Signal, 1)
-	signal.Notify(sigchan, os.Interrupt)
+	signal.Notify(sigchan, os.Interrupt, os.Kill)
 	go func() {
 		sn := <-sigchan
-		if sn == os.Interrupt {
+		if sn == os.Interrupt || sn == os.Kill {
 			_ = t.Close()
 			os.Exit(1)
 		}
 		signal.Stop(sigchan)
 		return
 	}()
-	defer func() { sigchan <- os.Kill }() // kill goroutine after function has ended
+	defer func() { var s os.Signal; sigchan <- s }() // kill goroutine after function has ended
 
 	var buf []string
 	var toggled bool
