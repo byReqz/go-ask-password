@@ -14,11 +14,13 @@ import (
 // Scan takes (printable) input till a newline is entered.
 // The prefix is shown before the input field.
 func Scan(prefix string) (string, error) {
-	tty, err := tty.Open()
+	t, err := tty.Open()
 	if err != nil {
 		return "", err
 	}
-	defer tty.Close()
+	defer func(t *tty.TTY) {
+		_ = t.Close()
+	}(t)
 
 	// handle interrupts (i.e. ctrl-c)
 	sigchan := make(chan os.Signal, 1)
@@ -26,7 +28,7 @@ func Scan(prefix string) (string, error) {
 	go func() {
 		sn := <-sigchan
 		if sn == os.Interrupt {
-			tty.Close()
+			_ = t.Close()
 			os.Exit(1)
 		}
 		signal.Stop(sigchan)
@@ -37,7 +39,7 @@ func Scan(prefix string) (string, error) {
 	fmt.Print(prefix)
 	var buf []string
 	for {
-		r, err := tty.ReadRune()
+		r, err := t.ReadRune()
 		if err != nil {
 			return "", err
 		}
@@ -76,11 +78,13 @@ func Fillerstring(prelen int, buflen int, filler string) string {
 // The prefix is shown before the input field.
 // The substitute is what's shown instead of the entered character.
 func ScanSecret(prefix string, substitute string) (string, error) {
-	tty, err := tty.Open()
+	t, err := tty.Open()
 	if err != nil {
 		return "", err
 	}
-	defer tty.Close()
+	defer func(t *tty.TTY) {
+		_ = t.Close()
+	}(t)
 
 	// handle interrupts (i.e. ctrl-c)
 	sigchan := make(chan os.Signal, 1)
@@ -88,7 +92,7 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 	go func() {
 		sn := <-sigchan
 		if sn == os.Interrupt {
-			tty.Close()
+			_ = t.Close()
 			os.Exit(1)
 		}
 		signal.Stop(sigchan)
@@ -103,7 +107,7 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 		if len(buf) == 0 && toggled {
 			fmt.Print("\r", Fillerstring(utf8.RuneCountInString(prefix), 24, " "), "\r", prefix)
 		}
-		r, err := tty.ReadRune()
+		r, err := t.ReadRune()
 		if err != nil {
 			return "", err
 		}
