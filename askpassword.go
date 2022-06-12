@@ -156,3 +156,8 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 func AskPassword() (string, error) {
 	return ScanSecret("🔐 Password: ", "*")
 }
+
+// AskUser is an opinionated default Username prompt
+func AskUser() (string, error) {
+	return Scan("Username: ")
+}
