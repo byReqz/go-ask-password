@@ -3,7 +3,7 @@ systemd-ask-password like password prompt for go
 
 # example usage
 ```go
-pw, err := AskPassword.AskPassword()
+pw, err := AskPassword.AskPassword("Password: ")
 if err != nil {
 	log.Fatal(err)
 }
