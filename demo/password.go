@@ -7,13 +7,17 @@ import (
 )
 
 func main() {
-	user, err := gap.AskUser()
+	user, err := gap.AskUser("Username: ")
 	if err != nil {
 		log.Fatal(err)
 	}
-	pw, err := gap.AskPassword()
+	pw, err := gap.AskPassword("Password: ")
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(user + ":" + pw)
+	tf, err := gap.AskKey("2FA: ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(user + ":" + pw + ":" + tf)
 }

@@ -153,11 +153,16 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 }
 
 // AskPassword is an opinionated default Password prompt like systemd-ask-password
-func AskPassword() (string, error) {
-	return ScanSecret(color.New(color.Bold, color.FgHiWhite).Sprint("🔐 Password: "), "*")
+func AskPassword(prefix string) (string, error) {
+	return ScanSecret(color.New(color.Bold, color.FgHiWhite).Sprint("🔐"+prefix), "*")
 }
 
 // AskUser is an opinionated default Username prompt
-func AskUser() (string, error) {
-	return Scan("Username: ")
+func AskUser(prefix string) (string, error) {
+	return Scan(color.New(color.Bold, color.FgHiWhite).Sprint("👤" + prefix))
+}
+
+// AskKey is an opinionated default Password prompt like systemd-ask-password
+func AskKey(prefix string) (string, error) {
+	return ScanSecret(color.New(color.Bold, color.FgHiWhite).Sprint("🔑"+prefix), "*")
 }
