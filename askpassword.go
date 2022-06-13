@@ -64,7 +64,7 @@ func Scan(prefix string) (string, error) {
 	return strings.Join(buf, ""), nil
 }
 
-func Fillerstring(prelen int, buflen int, filler string) string {
+func fillerstring(prelen int, buflen int, filler string) string {
 	var space string
 	var i int
 	for i < (prelen + buflen) {
@@ -105,7 +105,7 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 	fmt.Print(prefix, color.HiBlackString("(press TAB for no echo)"))
 	for {
 		if len(buf) == 0 && toggled {
-			fmt.Print("\r", Fillerstring(utf8.RuneCountInString(prefix), 24, " "), "\r", prefix)
+			fmt.Print("\r", fillerstring(utf8.RuneCountInString(prefix), 24, " "), "\r", prefix)
 		}
 		r, err := t.ReadRune()
 		if err != nil {
@@ -118,12 +118,12 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 			if !toggled && len(buf) == 0 {
 				toggled = !toggled
 			} else if toggled {
-				space := Fillerstring(utf8.RuneCountInString(prefix), len(buf), " ")
-				mask := Fillerstring(0, len(buf), "*")
+				space := fillerstring(utf8.RuneCountInString(prefix), len(buf), " ")
+				mask := fillerstring(0, len(buf), "*")
 				fmt.Print("\r", space, "\r", prefix, mask)
 				toggled = !toggled
 			} else {
-				space := Fillerstring(utf8.RuneCountInString(prefix), len(buf), " ")
+				space := fillerstring(utf8.RuneCountInString(prefix), len(buf), " ")
 				fmt.Print("\r", space, "\r", prefix, strings.Join(buf, ""))
 				toggled = !toggled
 			}
@@ -135,7 +135,7 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 		} else {
 			if unicode.IsPrint(r) {
 				if len(buf) == 0 {
-					space := Fillerstring(utf8.RuneCountInString(prefix), 24, " ")
+					space := fillerstring(utf8.RuneCountInString(prefix), 24, " ")
 					fmt.Print("\r", space, "\r", prefix)
 				}
 				buf = append(buf, string(r))
