@@ -77,7 +77,8 @@ func fillerstring(prelen int, buflen int, filler string) string {
 // ScanSecret takes (printable) input till a newline is entered.
 // The prefix is shown before the input field.
 // The substitute is what's shown instead of the entered character.
-func ScanSecret(prefix string, substitute string) (string, error) {
+// The placeholder is what's shown when there has been no user input yet.
+func ScanSecret(prefix string, substitute string, placeholder string) (string, error) {
 	t, err := tty.Open()
 	if err != nil {
 		return "", err
@@ -102,7 +103,7 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 
 	var buf []string
 	var toggled bool
-	fmt.Print(prefix, color.HiBlackString("(press TAB for no echo)"))
+	fmt.Print(prefix, color.HiBlackString(placeholder))
 	for {
 		if len(buf) == 0 && toggled {
 			fmt.Print("\r", fillerstring(utf8.RuneCountInString(prefix), 24, " "), "\r", prefix)
@@ -154,7 +155,7 @@ func ScanSecret(prefix string, substitute string) (string, error) {
 
 // AskPassword is an opinionated default Password prompt like systemd-ask-password
 func AskPassword(prefix string) (string, error) {
-	return ScanSecret(color.New(color.Bold, color.FgHiWhite).Sprint("🔐"+prefix), "*")
+	return ScanSecret(color.New(color.Bold, color.FgHiWhite).Sprint("🔐"+prefix), "*", "(press TAB for no echo)")
 }
 
 // AskUser is an opinionated default Username prompt
@@ -164,5 +165,5 @@ func AskUser(prefix string) (string, error) {
 
 // AskKey is an opinionated default Password prompt like systemd-ask-password
 func AskKey(prefix string) (string, error) {
-	return ScanSecret(color.New(color.Bold, color.FgHiWhite).Sprint("🔑"+prefix), "*")
+	return ScanSecret(color.New(color.Bold, color.FgHiWhite).Sprint("🔑"+prefix), "*", "(press TAB for no echo)")
 }
