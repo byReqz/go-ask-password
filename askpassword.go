@@ -120,7 +120,7 @@ func ScanSecret(prefix string, substitute string, placeholder string) (string, e
 				toggled = !toggled
 			} else if toggled {
 				space := fillerstring(utf8.RuneCountInString(prefix), len(buf), " ")
-				mask := fillerstring(0, len(buf), "*")
+				mask := fillerstring(0, len(buf), substitute)
 				fmt.Print("\r", space, "\r", prefix, mask)
 				toggled = !toggled
 			} else {
