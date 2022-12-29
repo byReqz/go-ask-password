@@ -1,3 +1,4 @@
+//nolint
 package main
 
 import (
@@ -7,7 +8,7 @@ import (
 )
 
 func main() {
-	tk, err := gap.ScanSecret("Token: ", "-")
+	tk, err := gap.ScanSecret("Token: ", "-", "Tab to toggle visibility")
 	if err != nil {
 		log.Fatal(err)
 	}

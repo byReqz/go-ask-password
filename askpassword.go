@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"syscall"
 	"unicode"
 	"unicode/utf8"
 )
@@ -24,15 +25,14 @@ func Scan(prefix string) (string, error) {
 
 	// handle interrupts (i.e. ctrl-c)
 	sigchan := make(chan os.Signal, 1)
-	signal.Notify(sigchan, os.Interrupt, os.Kill)
+	signal.Notify(sigchan, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		sn := <-sigchan
-		if sn == os.Interrupt || sn == os.Kill {
+		if sn == os.Interrupt || sn == syscall.SIGTERM {
 			_ = t.Close()
 			os.Exit(1)
 		}
 		signal.Stop(sigchan)
-		return
 	}()
 	defer func() { var s os.Signal; sigchan <- s }() // kill goroutine after function has ended
 
@@ -89,15 +89,14 @@ func ScanSecret(prefix string, substitute string, placeholder string) (string, e
 
 	// handle interrupts (i.e. ctrl-c)
 	sigchan := make(chan os.Signal, 1)
-	signal.Notify(sigchan, os.Interrupt, os.Kill)
+	signal.Notify(sigchan, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		sn := <-sigchan
-		if sn == os.Interrupt || sn == os.Kill {
+		if sn == os.Interrupt || sn == syscall.SIGTERM {
 			_ = t.Close()
 			os.Exit(1)
 		}
 		signal.Stop(sigchan)
-		return
 	}()
 	defer func() { var s os.Signal; sigchan <- s }() // kill goroutine after function has ended
 
