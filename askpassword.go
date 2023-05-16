@@ -101,12 +101,9 @@ func ScanSecret(prefix string, substitute string, placeholder string) (string, e
 	defer close(sigchan)
 
 	var buf []string
-	var toggled bool
+	var revealed bool // if the contents of the buffer are revealed to the user
 	fmt.Print(prefix, color.HiBlackString(placeholder))
 	for {
-		if len(buf) == 0 && toggled {
-			fmt.Print("\r", fillerstring(utf8.RuneCountInString(prefix), utf8.RuneCountInString(placeholder), " "), "\r", prefix)
-		}
 		r, err := t.ReadRune()
 		if err != nil {
 			return "", err
@@ -115,18 +112,14 @@ func ScanSecret(prefix string, substitute string, placeholder string) (string, e
 			fmt.Print("\n")
 			break
 		} else if r == 9 { // rune 9 == tab
-			if !toggled && len(buf) == 0 {
-				toggled = !toggled
-			} else if toggled {
-				space := fillerstring(utf8.RuneCountInString(prefix), len(buf), " ")
-				mask := fillerstring(0, len(buf), substitute)
-				fmt.Print("\r", space, "\r", prefix, mask)
-				toggled = !toggled
-			} else {
-				space := fillerstring(utf8.RuneCountInString(prefix), len(buf), " ")
-				fmt.Print("\r", space, "\r", prefix, strings.Join(buf, ""))
-				toggled = !toggled
+			space := fillerstring(utf8.RuneCountInString(prefix), len(buf), " ")
+			mask := fillerstring(0, len(buf), substitute)
+			if !revealed {
+				space = fmt.Sprint("\r", fillerstring(utf8.RuneCountInString(prefix), utf8.RuneCountInString(placeholder), " "), "\r", prefix)
+				mask = strings.Join(buf, "")
 			}
+			fmt.Print("\r", space, "\r", prefix, mask)
+			revealed = !revealed
 		} else if r == 127 || r == 8 { // rune 127 == backspace
 			if len(buf) > 0 {
 				buf = buf[:len(buf)-1]
@@ -139,7 +132,7 @@ func ScanSecret(prefix string, substitute string, placeholder string) (string, e
 					fmt.Print("\r", space, "\r", prefix)
 				}
 				buf = append(buf, string(r))
-				if toggled {
+				if revealed {
 					fmt.Print(string(r))
 				} else {
 					fmt.Print(substitute)
