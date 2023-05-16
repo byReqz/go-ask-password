@@ -52,13 +52,12 @@ func Scan(prefix string) (string, error) {
 				fmt.Print("\b \b")
 			}
 		} else {
-			if unicode.IsPrint(r) {
-				s := string(r)
-				buf = append(buf, s)
-				fmt.Print(s)
-			} else {
+			if !unicode.IsPrint(r) {
 				return strings.Join(buf, ""), fmt.Errorf("unprintable character entered")
 			}
+			s := string(r)
+			buf = append(buf, s)
+			fmt.Print(s)
 		}
 	}
 	return strings.Join(buf, ""), nil
@@ -126,19 +125,18 @@ func ScanSecret(prefix string, substitute string, placeholder string) (string, e
 				fmt.Print("\b \b")
 			}
 		} else {
-			if unicode.IsPrint(r) {
-				if len(buf) == 0 {
-					space := fillerstring(utf8.RuneCountInString(prefix), 24, " ")
-					fmt.Print("\r", space, "\r", prefix)
-				}
-				buf = append(buf, string(r))
-				if revealed {
-					fmt.Print(string(r))
-				} else {
-					fmt.Print(substitute)
-				}
-			} else {
+			if !unicode.IsPrint(r) {
 				return strings.Join(buf, ""), fmt.Errorf("unprintable character entered")
+			}
+			if len(buf) == 0 {
+				space := fillerstring(utf8.RuneCountInString(prefix), 24, " ")
+				fmt.Print("\r", space, "\r", prefix)
+			}
+			buf = append(buf, string(r))
+			if revealed {
+				fmt.Print(string(r))
+			} else {
+				fmt.Print(substitute)
 			}
 		}
 	}
