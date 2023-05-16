@@ -105,7 +105,7 @@ func ScanSecret(prefix string, substitute string, placeholder string) (string, e
 	fmt.Print(prefix, color.HiBlackString(placeholder))
 	for {
 		if len(buf) == 0 && toggled {
-			fmt.Print("\r", fillerstring(utf8.RuneCountInString(prefix), 24, " "), "\r", prefix)
+			fmt.Print("\r", fillerstring(utf8.RuneCountInString(prefix), utf8.RuneCountInString(placeholder), " "), "\r", prefix)
 		}
 		r, err := t.ReadRune()
 		if err != nil {
