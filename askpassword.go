@@ -34,7 +34,7 @@ func Scan(prefix string) (string, error) {
 		}
 		signal.Stop(sigchan)
 	}()
-	defer func() { var s os.Signal; sigchan <- s }() // kill goroutine after function has ended
+	defer close(sigchan)
 
 	fmt.Print(prefix)
 	var buf []string
@@ -98,7 +98,7 @@ func ScanSecret(prefix string, substitute string, placeholder string) (string, e
 		}
 		signal.Stop(sigchan)
 	}()
-	defer func() { var s os.Signal; sigchan <- s }() // kill goroutine after function has ended
+	defer close(sigchan)
 
 	var buf []string
 	var toggled bool
