@@ -110,6 +110,8 @@ func NewScan(opts Options) (string, error) {
 			continue
 		} else if opts.MaxLength > 0 && len(buf) == opts.MaxLength {
 			continue
+		} else if r == 0 { // drop NULLs (see issue #1, not necessary for organic input)
+			continue
 		}
 
 		if !unicode.IsPrint(r) {
