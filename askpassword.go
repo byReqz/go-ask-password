@@ -2,6 +2,7 @@ package askpassword
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"strings"
@@ -10,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/fatih/color"
+	"github.com/mattn/go-isatty"
 	"github.com/mattn/go-tty"
 )
 
@@ -22,7 +24,8 @@ const (
 )
 
 type Options struct {
-	Plain bool // does not hide the password if true
+	Plain     bool // does not hide the password if true
+	PullStdin bool // starts the prompt with the contents from stdin
 
 	Prefix      string // whats shown in front of the password field
 	Substitute  string // character/string shown instead of the password input
@@ -44,8 +47,32 @@ func fillerstring(prelen int, buflen int, filler string) string {
 	return space
 }
 
+// readStdin will read the contents of /dev/stdin and return it in the buffer format used by the prompt
+func readStdin() (stdin []string) {
+	if isatty.IsTerminal(os.Stdin.Fd()) {
+		return
+	}
+	infile, err := os.Open(os.Stdin.Name())
+	if err != nil {
+		return
+	}
+	buf, err := io.ReadAll(infile)
+	if err != nil {
+		return
+	}
+	for _, c := range string(buf) {
+		stdin = append(stdin, string(c))
+	}
+	return
+}
+
 // NewScan starts a new scanner with the given options.
 func NewScan(opts Options) (string, error) {
+	var inbuf []string // stdin contents before initializing the tty
+	if opts.PullStdin {
+		inbuf = readStdin()
+	}
+
 	t, err := tty.Open()
 	if err != nil {
 		return "", err
@@ -71,10 +98,16 @@ func NewScan(opts Options) (string, error) {
 		opts.BreakAt = keyReturn
 	}
 
-	var buf []string
+	var buf []string  // main buffer for the input prompt, each char is one string
 	var revealed bool // if the contents of the buffer are revealed to the user
 	fmt.Print(opts.Prefix, color.HiBlackString(opts.Placeholder))
 	for {
+		if opts.PullStdin {
+			for _, si := range inbuf {
+				t.Input().WriteString(si)
+			}
+		}
+
 		r, err := t.ReadRune()
 		if err != nil {
 			return "", err
@@ -138,8 +171,9 @@ func NewScan(opts Options) (string, error) {
 // Scan takes (printable) input until a newline is entered.
 func Scan(prefix string) (string, error) {
 	return NewScan(Options{
-		Plain:  true,
-		Prefix: prefix,
+		PullStdin: true,
+		Plain:     true,
+		Prefix:    prefix,
 	})
 }
 
