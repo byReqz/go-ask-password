@@ -14,10 +14,9 @@ import (
 )
 
 const (
-	keyReturn        = 13  // rune for return carriage
-	keyTab           = 9   // rune for tab
-	keyBackspace     = 127 // rune for backspace
-	keyCtrlBackspace = 23  // rune for ctrl + backspace
+	keyReturn        = 13 // rune for return carriage
+	keyTab           = 9  // rune for tab
+	keyCtrlBackspace = 23 // rune for ctrl + backspace
 	//keyCtrlD         = 4   // rune for ctrl + d
 )
 
@@ -96,7 +95,7 @@ func NewScan(opts Options) (string, error) {
 			fmt.Print("\r", space, "\r", opts.Prefix, mask)
 			revealed = !revealed
 			continue
-		} else if r == keyBackspace { // rune 127 == backspace, "|| r == 8" used to be here but i cant find 8 on the keyboard anymore :|
+		} else if r == keyBackspace { // rune 127 == backspace (8 on Windows)
 			if len(buf) > 0 {
 				buf = buf[:len(buf)-1]
 				fmt.Print("\b \b")
